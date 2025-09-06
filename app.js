@@ -63,15 +63,19 @@ function renderAnnis() {
     const date = new Date(anni.date);
     const diff = Math.ceil((date - today) / (1000 * 60 * 60 * 24));
     const msg = diff >= 0 ? `还有 ${diff} 天` : `已过去 ${Math.abs(diff)} 天`;
+    
+    const pinIcon = '<i class="far fa-bookmark"></i>';
+    const pinClass = anni.pinned ? 'btn-icon active' : 'btn-icon';
+
     item.innerHTML = `
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div>
-          <strong>${anni.pinned ? '📌 ' : ''}${anni.name}</strong> (${anni.date})<br>
+          <strong>${anni.name}</strong> (${anni.date})<br>
           <small>${msg}</small>
         </div>
         <div style="display: flex; gap: 8px;">
-          <button class="btn" onclick="togglePin(${originalIndex})" title="${anni.pinned ? '取消置顶' : '置顶'}">${anni.pinned ? '<i class="fas fa-thumbtack"></i>' : '<i class="far fa-thumbtack"></i>'}</button>
-          <button class="btn btn-danger" onclick="deleteAnni(${originalIndex})"><i class="fas fa-trash"></i></button>
+          <button class="${pinClass}" onclick="togglePin(${originalIndex})" title="${anni.pinned ? '取消置顶' : '置顶'}">${pinIcon}</button>
+          <button class="btn-icon btn-icon-danger" onclick="deleteAnni(${originalIndex})"><i class="fas fa-trash"></i></button>
         </div>
       </div>
     `;
@@ -126,7 +130,7 @@ function updateAnniversaryDisplay() {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const nearest = displayAnnis.map(a => ({...a, diff: new Date(a.date) - today})).sort((a,b) => Math.abs(a.diff) - Math.abs(b.diff))[0];
   const days = Math.ceil(nearest.diff / (1000 * 60 * 60 * 24));
-  titleEl.textContent = `${nearest.pinned ? '📌 ' : ''}${nearest.name}`;
+  titleEl.textContent = nearest.name;
   descEl.textContent = days >= 0 ? `还有 ${days} 天` : `已过去 ${Math.abs(days)} 天`;
 }
 
@@ -600,7 +604,10 @@ function renderEverything() {
 // ======== 页面切换 ========
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-  document.getElementById(`${pageId}-page`).style.display = 'block';
+  const pageToShow = document.getElementById(`${pageId}-page`);
+  if (pageToShow) {
+    pageToShow.style.display = (pageId === 'todo') ? 'flex' : 'block';
+  }
 
   document.querySelectorAll('.tab-bar button').forEach(b => b.classList.remove('active'));
   const activeTabMap = {

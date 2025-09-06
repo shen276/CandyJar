@@ -32,20 +32,18 @@
 
   <!-- 📋 待办清单 -->
   <div id="todo-page" class="page">
-    <div class="container">
-      <div class="header">
-        <span><i class="fas fa-list-check"></i> Our To-Do List</span>
-        <div class="custom-icons">
-          <span id="custom-icon-1">🐱</span>
-          <span id="custom-icon-2">💖</span>
-          <span id="custom-icon-3">📱</span>
-        </div>
+    <div class="header">
+      <span><i class="fas fa-list-check"></i> Our To-Do List</span>
+      <div class="custom-icons">
+        <span id="custom-icon-1">🐱</span>
+        <span id="custom-icon-2">💖</span>
+        <span id="custom-icon-3">📱</span>
       </div>
-      <div class="todo-list" id="todo-list"></div>
-      <div class="input-box">
-        <input type="text" id="new-task" placeholder="+ 添加新的小事...">
-        <button onclick="addTask()" class="add-task-btn"><i class="fas fa-plus"></i></button>
-      </div>
+    </div>
+    <div class="todo-list" id="todo-list"></div>
+    <div class="input-box">
+      <input type="text" id="new-task" placeholder="+ 添加新的小事...">
+      <button onclick="addTask()" class="add-task-btn"><i class="fas fa-plus"></i></button>
     </div>
   </div>
 
@@ -57,7 +55,7 @@
       </div>
       <div class="feature-grid">
         <div class="feature-card" onclick="showPage('anniversary')">
-          <div class="feature-icon"><i class="fas fa-calendar-heart"></i></div>
+          <div class="feature-icon"><i class="fas fa-star"></i></div>
           <div class="feature-content">
             <h3 id="anniversary-title">纪念日</h3>
             <p id="anniversary-desc">记录重要日期</p>
@@ -65,7 +63,7 @@
           <div class="feature-arrow"><i class="fas fa-chevron-right"></i></div>
         </div>
         <div class="feature-card" onclick="showPage('diary')">
-          <div class="feature-icon"><i class="fas fa-book-heart"></i></div>
+          <div class="feature-icon"><i class="fas fa-pen-fancy"></i></div>
           <div class="feature-content">
             <h3>恋爱日记</h3>
             <p>记录甜蜜瞬间</p>
@@ -86,53 +84,47 @@
 
   <!-- 🎉 纪念日 -->
   <div id="anniversary-page" class="page">
-    <div class="container">
-      <div class="header">
-        <span onclick="showPage('features')" class="back-header">
-          <i class="fas fa-chevron-left"></i> <i class="fas fa-calendar-heart"></i> 纪念日
-        </span>
-      </div>
-      <input type="text" id="anni-name" class="text-input" placeholder="纪念日名称">
-      <input type="date" id="anni-date" class="text-input">
-      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
-        <label class="checkbox-label">
-          <input type="checkbox" id="anni-pin">
-          置顶显示
-        </label>
-      </div>
-      <button onclick="addAnni()" class="btn"><i class="fas fa-plus"></i> 添加纪念日</button>
-      <div id="anni-list" style="margin-top:20px;"></div>
+    <div class="header">
+      <span onclick="showPage('features')" class="back-header">
+        <i class="fas fa-chevron-left"></i> <i class="fas fa-star"></i> 纪念日
+      </span>
     </div>
+    <input type="text" id="anni-name" class="text-input" placeholder="纪念日名称">
+    <input type="date" id="anni-date" class="text-input">
+    <div class="add-anni-controls">
+      <button onclick="addAnni()" class="btn"><i class="fas fa-plus"></i> 添加纪念日</button>
+      <label class="checkbox-label">
+        <input type="checkbox" id="anni-pin">
+        置顶显示
+      </label>
+    </div>
+    <div id="anni-list" style="margin-top:20px;"></div>
   </div>
 
   <!-- 📖 恋爱日记 -->
   <div id="diary-page" class="page">
-    <div class="container">
-      <div class="header">
-        <span onclick="showPage('features')" class="back-header">
-          <i class="fas fa-chevron-left"></i> <i class="fas fa-book-heart"></i> 恋爱日记
-        </span>
-      </div>
-      <input type="date" id="diary-date" class="text-input">
-      <textarea id="diary-content" rows="5" placeholder="写下今天的甜蜜瞬间..." class="text-input"></textarea>
-      <button onclick="addDiary()" class="btn" style="margin-top:12px;"><i class="fas fa-save"></i> 保存日记</button>
-      <div id="diary-list" style="margin-top:20px;"></div>
+    <div class="header">
+      <span onclick="showPage('features')" class="back-header">
+        <i class="fas fa-chevron-left"></i> <i class="fas fa-pen-fancy"></i> 恋爱日记
+      </span>
     </div>
+    <input type="date" id="diary-date" class="text-input">
+    <textarea id="diary-content" rows="5" placeholder="写下今天的甜蜜瞬间..." class="text-input"></textarea>
+    <button onclick="addDiary()" class="btn" style="margin-top:12px;"><i class="fas fa-save"></i> 保存日记</button>
+    <div id="diary-list" style="margin-top:20px;"></div>
   </div>
 
   <!-- 💬 聊天列表 -->
   <div id="chat-list-page" class="page">
-    <div class="container">
-      <div class="header">
-        <span onclick="showPage('features')" class="back-header">
-          <i class="fas fa-chevron-left"></i> 聊天列表
-        </span>
-        <button class="btn" onclick="createNewChat()">
-          <i class="fas fa-plus"></i> 新建聊天
-        </button>
-      </div>
-      <div id="chat-list-container"></div>
+    <div class="header">
+      <span onclick="showPage('features')" class="back-header">
+        <i class="fas fa-chevron-left"></i> 聊天列表
+      </span>
+      <button class="btn" onclick="createNewChat()">
+        <i class="fas fa-plus"></i> 新建聊天
+      </button>
     </div>
+    <div id="chat-list-container"></div>
   </div>
 
   <!-- 💬 聊天记录 -->
