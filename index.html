@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>我们的专属小本子</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#ff8fab">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="小清单">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <link rel="manifest" href="./manifest.json?v=1.0.4">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="./style.css?v=1.0.4">
+<link rel="stylesheet" href="/index.css">
+<script type="importmap">
+{
+  "imports": {
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "path": "https://aistudiocdn.com/path@^0.12.7",
+    "vite": "https://aistudiocdn.com/vite@^7.1.4"
+  }
+}
+</script>
+</head>
+<body>
+
+  <!-- 📋 待办清单 -->
+  <div id="todo-page" class="page">
+    <div class="container">
+      <div class="header">
+        <span><i class="fas fa-list-check"></i> Our To-Do List</span>
+        <div class="custom-icons">
+          <span id="custom-icon-1">🐱</span>
+          <span id="custom-icon-2">💖</span>
+          <span id="custom-icon-3">📱</span>
+        </div>
+      </div>
+      <div class="todo-list" id="todo-list"></div>
+      <div class="input-box">
+        <input type="text" id="new-task" placeholder="+ 添加新的小事...">
+        <button onclick="addTask()" class="add-task-btn"><i class="fas fa-plus"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎯 功能中心 -->
+  <div id="features-page" class="page">
+    <div class="container">
+      <div class="header">
+        <span><i class="fas fa-shapes"></i> 功能中心</span>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card" onclick="showPage('anniversary')">
+          <div class="feature-icon"><i class="fas fa-calendar-heart"></i></div>
+          <div class="feature-content">
+            <h3 id="anniversary-title">纪念日</h3>
+            <p id="anniversary-desc">记录重要日期</p>
+          </div>
+          <div class="feature-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        <div class="feature-card" onclick="showPage('diary')">
+          <div class="feature-icon"><i class="fas fa-book-heart"></i></div>
+          <div class="feature-content">
+            <h3>恋爱日记</h3>
+            <p>记录甜蜜瞬间</p>
+          </div>
+          <div class="feature-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+        <div class="feature-card" onclick="showPage('chat-list')">
+          <div class="feature-icon"><i class="fas fa-comments"></i></div>
+          <div class="feature-content">
+            <h3>聊天记录</h3>
+            <p>保存聊天内容</p>
+          </div>
+          <div class="feature-arrow"><i class="fas fa-chevron-right"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 🎉 纪念日 -->
+  <div id="anniversary-page" class="page">
+    <div class="container">
+      <div class="header">
+        <span onclick="showPage('features')" class="back-header">
+          <i class="fas fa-chevron-left"></i> <i class="fas fa-calendar-heart"></i> 纪念日
+        </span>
+      </div>
+      <input type="text" id="anni-name" class="text-input" placeholder="纪念日名称">
+      <input type="date" id="anni-date" class="text-input">
+      <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+        <label class="checkbox-label">
+          <input type="checkbox" id="anni-pin">
+          置顶显示
+        </label>
+      </div>
+      <button onclick="addAnni()" class="btn"><i class="fas fa-plus"></i> 添加纪念日</button>
+      <div id="anni-list" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- 📖 恋爱日记 -->
+  <div id="diary-page" class="page">
+    <div class="container">
+      <div class="header">
+        <span onclick="showPage('features')" class="back-header">
+          <i class="fas fa-chevron-left"></i> <i class="fas fa-book-heart"></i> 恋爱日记
+        </span>
+      </div>
+      <input type="date" id="diary-date" class="text-input">
+      <textarea id="diary-content" rows="5" placeholder="写下今天的甜蜜瞬间..." class="text-input"></textarea>
+      <button onclick="addDiary()" class="btn" style="margin-top:12px;"><i class="fas fa-save"></i> 保存日记</button>
+      <div id="diary-list" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- 💬 聊天列表 -->
+  <div id="chat-list-page" class="page">
+    <div class="container">
+      <div class="header">
+        <span onclick="showPage('features')" class="back-header">
+          <i class="fas fa-chevron-left"></i> 聊天列表
+        </span>
+        <button class="btn" onclick="createNewChat()">
+          <i class="fas fa-plus"></i> 新建聊天
+        </button>
+      </div>
+      <div id="chat-list-container"></div>
+    </div>
+  </div>
+
+  <!-- 💬 聊天记录 -->
+  <div id="chat-page" class="page">
+    <div id="chat-background-layer"></div>
+    <div class="chat-header-fixed">
+      <button class="chat-action-btn" onclick="showPage('chat-list')"><i class="fas fa-chevron-left"></i></button>
+      <div class="chat-info">
+        <h3 class="chat-name" id="chat-page-name"></h3>
+      </div>
+      <div class="chat-header-actions">
+        <button class="chat-action-btn" onclick="togglePerspective()" id="perspective-btn" title="切换发送方"><i class="fas fa-repeat"></i></button>
+        <button class="chat-action-btn" onclick="openChatSettings()"><i class="fas fa-ellipsis-v"></i></button>
+      </div>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-input-area-fixed">
+      <textarea class="chat-input" id="chat-input" placeholder="输入消息..." rows="1"></textarea>
+      <div class="chat-actions">
+        <button class="chat-action-btn" onclick="addVoiceMessage()" title="发送语音"><i class="fas fa-microphone"></i></button>
+        <button class="chat-action-btn" onclick="addImageMessage()" title="添加图片"><i class="fas fa-image"></i></button>
+        <button class="chat-action-btn" onclick="sendMessage()" title="发送"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⚙️ 设置 -->
+  <div id="settings-page" class="page">
+    <div class="settings-container">
+      <div class="header">
+        <span><i class="fas fa-gear"></i> 设置</span>
+      </div>
+      
+      <div class="settings-section">
+        <h3><i class="fas fa-icons"></i> 待办清单图标</h3>
+        <div class="setting-item">
+          <span class="setting-label">自定义图标1</span>
+          <input type="text" class="setting-input" id="icon-1-input" placeholder="输入emoji" onchange="updateCustomIcon(1, this.value)">
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">自定义图标2</span>
+          <input type="text" class="setting-input" id="icon-2-input" placeholder="输入emoji" onchange="updateCustomIcon(2, this.value)">
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">自定义图标3</span>
+          <input type="text" class="setting-input" id="icon-3-input" placeholder="输入emoji" onchange="updateCustomIcon(3, this.value)">
+        </div>
+      </div>
+      
+      <div class="settings-section">
+        <h3><i class="fas fa-paint-brush"></i> 聊天样式</h3>
+        <div class="setting-item-column">
+          <span class="setting-label">自定义消息气泡 (CSS)</span>
+          <textarea id="custom-css-input" class="text-input" rows="5" placeholder=".message.sent .message-content {&#10;  background: linear-gradient(135deg, #ff8fab, #fb6b90);&#10;}&#10;.message.received .message-content {&#10;  background: #fff;&#10;}"></textarea>
+          <button class="btn" onclick="saveCustomCSS()">保存样式</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3><i class="fas fa-database"></i> 数据管理</h3>
+        <div class="setting-item">
+          <span class="setting-label">导出数据</span>
+          <button class="btn" onclick="exportData()"><i class="fas fa-upload"></i> 导出</button>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">导入数据</span>
+          <label class="btn file-upload-btn">
+            <i class="fas fa-download"></i> 导入
+            <input type="file" id="import-data-input" accept=".json" onchange="importData(this)">
+          </label>
+        </div>
+        <div class="setting-item">
+          <span class="setting-label">清空所有数据</span>
+          <button class="btn btn-danger" onclick="clearAllData()"><i class="fas fa-trash"></i> 清空</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 聊天设置模态框 -->
+  <div id="chat-settings-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-comment-cog"></i> 聊天设置</h3>
+        <button class="modal-close" onclick="closeChatSettings()">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+          <div class="setting-item">
+            <span class="setting-label">聊天名称</span>
+            <input type="text" class="setting-input" id="modal-chat-name-input" onchange="updateCurrentChatDetails('name', this.value)">
+          </div>
+          <div class="setting-item">
+            <span class="setting-label">对方头像</span>
+            <label class="btn file-upload-btn">
+              <i class="fas fa-user-edit"></i> 更换
+              <input type="file" id="modal-chat-avatar-input" accept="image/*" onchange="updateCurrentChatDetails('avatar', this.files[0])">
+            </label>
+          </div>
+          <div class="setting-item">
+            <span class="setting-label">聊天背景</span>
+             <label class="btn file-upload-btn">
+              <i class="fas fa-image"></i> 更换
+              <input type="file" id="modal-chat-bg-input" accept="image/*" onchange="updateCurrentChatDetails('background', this.files[0])">
+            </label>
+          </div>
+          <div class="setting-item">
+            <span class="setting-label">删除聊天</span>
+            <button class="btn btn-danger" onclick="deleteCurrentChat()"><i class="fas fa-trash"></i> 删除</button>
+          </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="tab-bar">
+    <button id="tab-todo" class="active" onclick="showPage('todo')"><i class="fas fa-list-check"></i><span>清单</span></button>
+    <button id="tab-features" onclick="showPage('features')"><i class="fas fa-shapes"></i><span>功能</span></button>
+    <button id="tab-settings" onclick="showPage('settings')"><i class="fas fa-gear"></i><span>设置</span></button>
+  </div>
+
+  <script src="./app.js?v=1.0.4"></script>
+  <script>
+    // 注册 Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then(registration => {
+            console.log('SW 注册成功:', registration);
+          })
+          .catch(registrationError => {
+            console.log('SW 注册失败:', registrationError);
+          });
+      });
+    }
+  </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
