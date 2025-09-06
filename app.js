@@ -7,6 +7,7 @@ let customIcons = ["🐱", "💖", "📱"];
 let currentChatId = null;
 let currentPerspective = 'sent'; // 'sent' or 'received'
 let longPressTimer;
+let didLongPress = false; // Flag to distinguish click from long press
 
 // ======== 📋 待办清单 ========
 const todoList = document.getElementById("todo-list");
@@ -218,6 +219,7 @@ function createNewChat() {
             id: Date.now().toString(),
             name: name.trim(),
             avatar: '',
+            senderAvatar: '',
             background: '',
             messages: []
         };
@@ -253,46 +255,76 @@ function renderChatMessages() {
   chat.messages.forEach((msg, index) => {
     const div = document.createElement("div");
     div.className = `message ${msg.type}`;
-    const avatar = msg.type === 'sent' 
-        ? '<div class="message-avatar">我</div>' 
-        : chat.avatar 
-            ? `<div class="message-avatar" style="background-image: url(${chat.avatar});"></div>`
-            : `<div class="message-avatar">${chat.name.charAt(0) || '?'}</div>`;
+
+    const sentAvatarHTML = chat.senderAvatar
+        ? `<div class="message-avatar" style="background: url(${chat.senderAvatar}) center/cover no-repeat;"></div>`
+        : '<div class="message-avatar">我</div>';
+
+    const receivedAvatarHTML = chat.avatar 
+        ? `<div class="message-avatar" style="background: url(${chat.avatar}) center/cover no-repeat;"></div>`
+        : `<div class="message-avatar">${chat.name.charAt(0) || '?'}</div>`;
     
-    let content;
+    let messageBody;
     if (msg.contentType === 'image') {
-      content = `<img src="${msg.content}" alt="图片" class="message-image">`;
-    } else if (msg.contentType === 'voice') {
-      content = `
-        <div class="voice-message-container">
-          <i class="fas fa-play"></i>
-          <div class="voice-waveform"></div>
-          <span class="voice-duration">${msg.content}s</span>
-        </div>
-        <div class="voice-transcript" id="transcript-${index}" style="display: none;">
-           <div class="transcript-content" id="transcript-content-${index}"></div>
-           <div class="transcript-actions">
-                <button class="btn-icon" onclick="editTranscript(${index})" title="编辑"><i class="fas fa-edit"></i></button>
-           </div>
-        </div>`;
+        messageBody = `<img src="${msg.content}" alt="图片" class="message-image">`;
     } else {
-      content = msg.content;
+        let content;
+        let messageContentStyle = '';
+        if (msg.contentType === 'voice') {
+          const minWidth = 80;
+          const maxWidth = 250;
+          const duration = msg.content;
+          const width = minWidth + (duration * 4); // 4px per second
+          const finalWidth = Math.min(width, maxWidth);
+          messageContentStyle = `style="width: ${finalWidth}px;"`;
+
+          content = `
+            <div class="voice-message-container">
+              <i class="fas fa-play"></i>
+              <div class="voice-waveform"></div>
+              <span class="voice-duration">${msg.content}s</span>
+            </div>
+            <div class="voice-transcript" id="transcript-${index}" style="display: none;">
+               <div class="transcript-content" id="transcript-content-${index}"></div>
+               <div class="transcript-actions">
+                    <button class="btn-icon" onclick="editTranscript(event, ${index})" title="编辑"><i class="fas fa-edit"></i></button>
+               </div>
+            </div>`;
+        } else {
+          content = msg.content;
+        }
+        messageBody = `<div class="message-content" id="message-content-${index}" ${messageContentStyle}>${content}</div>`;
     }
 
     div.innerHTML = `
-      ${msg.type === 'received' ? avatar : ''}
-      <div class="message-content" id="message-content-${index}">${content}</div>
-      ${msg.type === 'sent' ? avatar : ''}
+      ${msg.type === 'received' ? receivedAvatarHTML : ''}
+      ${messageBody}
+      ${msg.type === 'sent' ? sentAvatarHTML : ''}
     `;
     container.appendChild(div);
 
     if (msg.contentType === 'voice') {
         const messageContentEl = document.getElementById(`message-content-${index}`);
+        
+        // Long press to transcribe/toggle
         messageContentEl.addEventListener('mousedown', () => startLongPress(index));
         messageContentEl.addEventListener('mouseup', cancelLongPress);
         messageContentEl.addEventListener('mouseleave', cancelLongPress);
         messageContentEl.addEventListener('touchstart', () => startLongPress(index));
         messageContentEl.addEventListener('touchend', cancelLongPress);
+
+        // Click to hide transcript
+        messageContentEl.addEventListener('click', () => {
+            if (didLongPress) {
+                didLongPress = false;
+                return;
+            }
+            const transcriptDiv = document.getElementById(`transcript-${index}`);
+            if (transcriptDiv && transcriptDiv.style.display === 'flex') {
+                transcriptDiv.style.display = 'none';
+            }
+        });
+
         if (msg.editableTranscript) {
             displayTranscript(index, msg.editableTranscript, false);
         }
@@ -364,8 +396,10 @@ function addVoiceMessage() {
 }
 
 function startLongPress(index) {
-    cancelLongPress(); // Clear any existing timers
+    cancelLongPress();
+    didLongPress = false;
     longPressTimer = setTimeout(() => {
+        didLongPress = true;
         transcribeVoiceMessage(index);
     }, 800); // 800ms for long press
 }
@@ -385,9 +419,15 @@ async function transcribeVoiceMessage(index) {
         return;
     }
     
+    const messageContentEl = document.getElementById(`message-content-${index}`);
+    if (messageContentEl) messageContentEl.classList.add('is-transcribing');
+
     displayTranscript(index, '<i>💖 正在转为文字...</i>', true);
 
     const transcript = await window.transcribeAudio(msg.content);
+
+    if (messageContentEl) messageContentEl.classList.remove('is-transcribing');
+    
     msg.transcript = transcript;
     msg.editableTranscript = transcript;
     saveData('chats');
@@ -403,7 +443,8 @@ function displayTranscript(index, text, show) {
     }
 }
 
-function editTranscript(index) {
+function editTranscript(event, index) {
+    event.stopPropagation();
     const chat = chats.find(c => c.id === currentChatId);
     if (!chat) return;
     const newTranscript = prompt("编辑文字:", chat.messages[index].editableTranscript);
@@ -438,14 +479,20 @@ function updateCurrentChatDetails(field, value) {
     if (field === 'name') {
         chat.name = value;
         document.getElementById('chat-page-name').textContent = value;
-    } else if (field === 'avatar' || field === 'background') {
+        renderChatList();
+    } else if (field === 'avatar' || field === 'background' || field === 'senderAvatar') {
         const file = value;
         if(file) {
             const reader = new FileReader();
             reader.onload = e => {
                 chat[field] = e.target.result;
                 saveData('chats');
-                openChat(currentChatId); // Re-render chat page
+                if (field === 'background') {
+                    const bgLayer = document.getElementById('chat-background-layer');
+                    if (bgLayer) bgLayer.style.backgroundImage = `url(${e.target.result})`;
+                }
+                renderChatMessages();
+                renderChatList();
             };
             reader.readAsDataURL(file);
         }
@@ -568,13 +615,20 @@ function loadAllData() {
     chats = JSON.parse(localStorage.getItem("chats")) || [];
     customIcons = JSON.parse(localStorage.getItem("customIcons")) || ["🐱", "💖", "📱"];
     
-    // Migration from old chat format
+    // Migration for new chat properties
+    chats.forEach(chat => {
+      if (typeof chat.senderAvatar === 'undefined') {
+        chat.senderAvatar = '';
+      }
+    });
+
     const oldChatData = localStorage.getItem('chatData');
     if (oldChatData && chats.length === 0) {
         const migratedChat = {
             id: 'migrated-1',
             name: localStorage.getItem('chatName') || '我们的聊天',
             avatar: localStorage.getItem('receivedAvatar') || '',
+            senderAvatar: '',
             background: localStorage.getItem('chatBackground') || '',
             messages: JSON.parse(oldChatData)
         };

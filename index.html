@@ -227,6 +227,13 @@
             </label>
           </div>
           <div class="setting-item">
+            <span class="setting-label">我的头像</span>
+            <label class="btn file-upload-btn">
+              <i class="fas fa-user-edit"></i> 更换
+              <input type="file" id="modal-chat-sender-avatar-input" accept="image/*" onchange="updateCurrentChatDetails('senderAvatar', this.files[0])">
+            </label>
+          </div>
+          <div class="setting-item">
             <span class="setting-label">聊天背景</span>
              <label class="btn file-upload-btn">
               <i class="fas fa-image"></i> 更换
